@@ -2,7 +2,7 @@
 // This service acts as a thin wrapper around the provider manager.
 // It receives the raw request data and forwards it to the currently selected AI provider.
 
-const { generateResponse } = require('./providers/providerManager');
+const { generateResponse } = require('../providerManager');
 
 /**
  * Calls the provider manager to obtain a fixed code response.
