@@ -15,7 +15,10 @@ async function generateResponse(code, instruction) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY environment variable is not configured');
+    const error = new Error('GEMINI_API_KEY environment variable is not configured');
+    error.status = 503;
+    error.code = 'GEMINI_API_KEY_MISSING';
+    throw error;
   }
 
   const ai = new GoogleGenAI({
@@ -85,11 +88,18 @@ Important:
       };
     }
   } catch (error) {
-    console.error('Gemini API error:', error);
+    console.error('Gemini API error:', {
+      message: error.message,
+      status: error.status || error.statusCode,
+      code: error.code
+    });
 
-    throw new Error(
+    const providerError = new Error(
       `Gemini request failed: ${error.message || 'Unknown error'}`
     );
+    providerError.status = Number(error.status || error.statusCode) || 502;
+    providerError.code = error.code || 'GEMINI_REQUEST_FAILED';
+    throw providerError;
   }
 }
 
