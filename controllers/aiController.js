@@ -1,19 +1,20 @@
-// services/aiService.js
-// This service acts as a thin wrapper around the provider manager.
-// It receives the raw request data and forwards it to the currently selected AI provider.
-
 const { generateResponse } = require('../providerManager');
 
-/**
- * Calls the provider manager to obtain a fixed code response.
- * @param {string} code - The source code from the frontend.
- * @param {string} instruction - The user instruction (e.g., "Fix Code").
- * @returns {Promise<{fixedCode:string, insights?:string[]}>}
- */
 async function fixCode(code, instruction) {
-  // The provider manager abstracts away which AI service is used.
-  // At the moment it delegates to the MockProvider.
-  return await generateResponse(code, instruction);
+  return generateResponse(code, instruction);
 }
 
-module.exports = { fixCode };
+async function handleFixCode(req, res) {
+  try {
+    const { code, instruction } = req.body || {};
+    const result = await fixCode(code, instruction);
+    res.json(result);
+  } catch (error) {
+    console.error('Code-fix request failed:', error.message);
+    res.status(502).json({
+      error: 'The AI provider could not process this request.'
+    });
+  }
+}
+
+module.exports = { fixCode, handleFixCode };
